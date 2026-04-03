@@ -16,4 +16,40 @@ public class AdderResourceTest {
     @RestClient 
     SolverService solverService;
 
+    @Test
+    public void simpleSum() {
+        Mockito.when(solverService.solve("2")).thenReturn(Float.valueOf("2"));
+        Mockito.when(solverService.solve("3")).thenReturn(Float.valueOf("3"));
+
+        given()
+                .when().get("3/2")
+                .then()
+                .statusCode(200)
+                .body(is("5.0"));
+    }
+
+    @Test
+    public void negativeSum() {
+        Mockito.when(solverService.solve("-2")).thenReturn(Float.valueOf("-2"));
+        Mockito.when(solverService.solve("3")).thenReturn(Float.valueOf("3"));
+
+        given()
+                .when().get("3/-2")
+                .then()
+                .statusCode(200)
+                .body(is("1.0"));
+    }
+
+    @Test
+    public void wrongValue() {
+        WebApplicationException cause = new WebApplicationException("Unknown error", Response.Status.BAD_REQUEST);
+        Mockito.when(solverService.solve("a")).thenThrow( new ResteasyWebApplicationException(cause) );
+        Mockito.when(solverService.solve("3")).thenReturn(Float.valueOf("3"));
+
+        given()
+                .when().get("3/a")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
 }
